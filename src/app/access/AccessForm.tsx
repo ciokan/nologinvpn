@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -107,7 +108,7 @@ export function AccessForm() {
         <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             <ChevronLeft className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-            <Shield className="h-5 w-5 text-primary" />
+            <Image src={"logo-mobile.svg"} width="30" height="30" alt="NoLoginVPN - VPN Without Login, Registration, or Logs" />
             <span className="font-semibold tracking-tight">NoLoginVPN</span>
           </Link>
           <ModeToggle />
