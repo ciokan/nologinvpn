@@ -117,7 +117,7 @@ export function AccessForm() {
 
       {/* Background glow */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary/5 blur-[120px] rounded-full" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary/15 dark:bg-primary/5 blur-[120px] rounded-full" />
       </div>
 
       {/* Content */}
