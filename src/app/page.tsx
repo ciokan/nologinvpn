@@ -120,7 +120,7 @@ export default async function Home() {
         url: siteConfig.url,
         logo: {
           "@type": "ImageObject",
-          url: `${siteConfig.url}/logo.png`,
+          url: `${siteConfig.url}/logo-mobile.png`,
         },
         sameAs: [],
       },
