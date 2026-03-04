@@ -225,8 +225,8 @@ export function AccessForm() {
                 <div className="bg-amber-500/10 border border-amber-500/25 rounded-lg p-4 mb-4">
                   <div className="flex gap-3">
                     <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                    <div className="text-xs text-amber-200/80 leading-relaxed">
-                      <strong className="text-amber-400">
+                    <div className="text-xs text-amber-500 leading-relaxed">
+                      <strong className="text-amber-500">
                         Back this up now.
                       </strong>{" "}
                       Save it in a password manager, write it down, or store
@@ -239,11 +239,10 @@ export function AccessForm() {
                 {/* Confirmation checkbox */}
                 <label className="flex items-start gap-3 cursor-pointer group mb-5">
                   <div
-                    className={`mt-0.5 w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
-                      confirmed
-                        ? "bg-primary border-primary"
-                        : "border-muted-foreground/40 group-hover:border-primary/50"
-                    }`}
+                    className={`mt-0.5 w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${confirmed
+                      ? "bg-primary border-primary"
+                      : "border-muted-foreground/40 group-hover:border-primary/50"
+                      }`}
                     onClick={() => setConfirmed((c) => !c)}
                   >
                     {confirmed && <Check className="h-2.5 w-2.5 text-primary-foreground" />}
