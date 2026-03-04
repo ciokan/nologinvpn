@@ -3,22 +3,25 @@ import { Shield, Zap, Globe, Lock, ChevronRight, Check, Eye, RefreshCcw } from "
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ModeToggle } from "@/components/ui/mode-toggle";
+import { db } from "@/lib/db";
+import { plans as plansTable } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 const features = [
   {
     icon: Shield,
     title: "Zero-Knowledge Architecture",
-    desc: "No email, no name, no password. Your access key lives only with you.",
+    desc: "No email, no name, no password and no logs. Your access key lives only with you.",
   },
   {
     icon: Zap,
     title: "WireGuard & Amnezia VPN",
-    desc: "Standard WireGuard for speed, Amnezia WG for obfuscation. Pick the right tool for your threat model.",
+    desc: "Standard WireGuard for speed, Amnezia WG for obfuscation. Pick any and browse freely.",
   },
   {
     icon: Globe,
     title: "Global Nodes",
-    desc: "Servers across 8+ countries. Low-latency routes, no single point of failure.",
+    desc: "Servers across many countries. Low-latency routes, no single point of failure.",
   },
   {
     icon: Lock,
@@ -28,23 +31,29 @@ const features = [
   {
     icon: Eye,
     title: "No Logs",
-    desc: "We don't track connections, timestamps, or bandwidth. Nothing to hand over.",
+    desc: "We don't track connections, timestamps, or bandwidth. Nothing to hand over. Even if we wanted to.",
   },
   {
     icon: RefreshCcw,
     title: "No Auto-Renewal",
-    desc: "Pay once, use it. No subscriptions, no recurring charges, no surprise bills. Add more time when you're ready.",
+    desc: "Pay once, use it. No subscriptions, no recurring charges, no surprise bills. Add more time when you need.",
   },
 ];
 
-const plans = [
-  { label: "1 Month", price: "$6.99", perMonth: "$6.99/mo", popular: false },
-  { label: "3 Months", price: "$17.99", perMonth: "$6.00/mo", popular: false },
-  { label: "6 Months", price: "$29.99", perMonth: "$5.00/mo", popular: true },
-  { label: "12 Months", price: "$49.99", perMonth: "$4.17/mo", popular: false },
-];
+export default async function Home() {
+  const rows = await db
+    .select()
+    .from(plansTable)
+    .where(eq(plansTable.active, true))
+    .orderBy(plansTable.durationMonths);
 
-export default function Home() {
+  const plans = rows.map((p) => ({
+    id: p.id,
+    label: p.label,
+    price: `$${Number(p.priceUsd).toFixed(0)}`,
+    perMonth: `$${(Number(p.priceUsd) / p.durationMonths).toFixed(2)}/mo`,
+    popular: p.durationMonths === 6,
+  }));
   return (
     <div className="min-h-screen">
       {/* ── Nav ── */}
@@ -214,12 +223,11 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {plans.map((plan) => (
               <div
-                key={plan.label}
-                className={`relative card-glass rounded-xl p-6 flex flex-col transition-all duration-300 ${
-                  plan.popular
-                    ? "border-primary/40 bg-primary/5"
-                    : "hover:border-border/80"
-                }`}
+                key={plan.id}
+                className={`relative card-glass rounded-xl p-6 flex flex-col transition-all duration-300 ${plan.popular
+                  ? "border-primary/40 bg-primary/5"
+                  : "hover:border-border/80"
+                  }`}
               >
                 {plan.popular && (
                   <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold">
@@ -247,11 +255,10 @@ export default function Home() {
                 <Link href="/access">
                   <Button
                     size="sm"
-                    className={`w-full font-semibold ${
-                      plan.popular
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                        : "bg-muted hover:bg-muted/80 text-foreground"
-                    }`}
+                    className={`w-full font-semibold ${plan.popular
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                      : "bg-muted hover:bg-muted/80 text-foreground"
+                      }`}
                   >
                     Get Started
                   </Button>
