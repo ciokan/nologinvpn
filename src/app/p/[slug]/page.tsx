@@ -16,10 +16,31 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const page = await getPageBySlug(slug);
-  if (!page) return {};
+  if (!page) return { title: "Not Found" };
+
+  // Legal/content pages: allow indexing, but no OG sharing emphasis
+  const isLegal = ["privacy-policy", "terms", "cookie-policy"].includes(slug);
+
   return {
-    title: `${page.title} — NoLoginVPN`,
+    title: page.title,
     description: page.excerpt,
+    robots: isLegal
+      ? { index: true, follow: true }
+      : { index: true, follow: true },
+    alternates: {
+      canonical: `https://nologinvpn.com/p/${slug}`,
+    },
+    openGraph: {
+      type: "article",
+      title: page.title,
+      description: page.excerpt,
+      url: `https://nologinvpn.com/p/${slug}`,
+    },
+    twitter: {
+      card: "summary",
+      title: page.title,
+      description: page.excerpt,
+    },
   };
 }
 

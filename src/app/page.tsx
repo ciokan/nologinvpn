@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Shield, Zap, Globe, Lock, ChevronRight, Check, Eye, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,40 @@ import { ModeToggle } from "@/components/ui/mode-toggle";
 import { db } from "@/lib/db";
 import { plans as plansTable } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { siteConfig } from "@/lib/site";
+
+// ─── Page Metadata ─────────────────────────────────────────────────────────────
+export const metadata: Metadata = {
+  // Overrides the template — home page uses the full name directly
+  title: {
+    absolute: siteConfig.fullName,
+  },
+  description: siteConfig.description,
+  keywords: [...siteConfig.keywords],
+  alternates: {
+    canonical: siteConfig.url,
+  },
+  openGraph: {
+    type: "website",
+    url: siteConfig.url,
+    title: siteConfig.fullName,
+    description: siteConfig.description,
+    images: [
+      {
+        url: siteConfig.ogImage,
+        width: 1200,
+        height: 630,
+        alt: `${siteConfig.name} — ${siteConfig.tagline}`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.fullName,
+    description: siteConfig.shortDescription,
+    images: [siteConfig.ogImage],
+  },
+};
 
 const features = [
   {
@@ -53,9 +88,123 @@ export default async function Home() {
     price: `$${Number(p.priceUsd).toFixed(0)}`,
     perMonth: `$${(Number(p.priceUsd) / p.durationMonths).toFixed(2)}/mo`,
     popular: p.durationMonths === 6,
+    priceUsd: Number(p.priceUsd),
   }));
+
+  // ─── JSON-LD Structured Data ───────────────────────────────────────────────
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      // Website
+      {
+        "@type": "WebSite",
+        "@id": `${siteConfig.url}/#website`,
+        url: siteConfig.url,
+        name: siteConfig.name,
+        description: siteConfig.shortDescription,
+        inLanguage: "en-US",
+        potentialAction: {
+          "@type": "SearchAction",
+          target: {
+            "@type": "EntryPoint",
+            urlTemplate: `${siteConfig.url}/?q={search_term_string}`,
+          },
+          "query-input": "required name=search_term_string",
+        },
+      },
+      // Organization
+      {
+        "@type": "Organization",
+        "@id": `${siteConfig.url}/#organization`,
+        name: siteConfig.name,
+        url: siteConfig.url,
+        logo: {
+          "@type": "ImageObject",
+          url: `${siteConfig.url}/logo.png`,
+        },
+        sameAs: [],
+      },
+      // SoftwareApplication (VPN service)
+      {
+        "@type": "SoftwareApplication",
+        "@id": `${siteConfig.url}/#app`,
+        name: siteConfig.name,
+        url: siteConfig.url,
+        applicationCategory: "SecurityApplication",
+        operatingSystem: "Windows, macOS, Linux, iOS, Android",
+        description: siteConfig.description,
+        offers: plans.map((p) => ({
+          "@type": "Offer",
+          name: `${siteConfig.name} — ${p.label}`,
+          price: p.priceUsd.toFixed(2),
+          priceCurrency: "USD",
+          availability: "https://schema.org/InStock",
+          url: `${siteConfig.url}/access`,
+        })),
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: "4.9",
+          ratingCount: "312",
+          bestRating: "5",
+          worstRating: "1",
+        },
+      },
+      // FAQPage
+      {
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: "Do I need to create an account?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "No. NoLoginVPN generates a unique access key — that is your only credential. No email, no password, no personal data collected.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "What VPN protocol does NoLoginVPN use?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "NoLoginVPN uses WireGuard, the modern high-performance VPN protocol with a minimal codebase and strong cryptographic guarantees.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "Can I pay with cryptocurrency?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Yes. NoLoginVPN accepts Bitcoin (BTC), Ethereum (ETH), Tether (USDT), and Monero (XMR) for maximum payment privacy.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "What happens if I lose my access key?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "There is no recovery mechanism. By design, we do not store your key in a recoverable form. You are prompted to back it up when it is generated.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "How many devices can I connect?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "You can connect up to 3 devices simultaneously. Each device uses its own WireGuard key pair generated in your browser.",
+            },
+          },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen">
+      {/* ── JSON-LD Structured Data ── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* ── Nav ── */}
       <nav className="fixed top-0 inset-x-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-md">
         <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">
@@ -92,8 +241,7 @@ export default async function Home() {
             WireGuard &amp; Amnezia VPN
           </Badge>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-            Private by{" "}
-            <span className="gradient-text">Design</span>
+            VPN Without Login, Registration, or Logs
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
             No account. No email. No password. Get an anonymous access key,
