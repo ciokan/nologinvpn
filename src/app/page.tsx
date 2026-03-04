@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { Shield, Zap, Globe, Lock, ChevronRight, Check, Eye, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -209,7 +210,7 @@ export default async function Home() {
       <nav className="fixed top-0 inset-x-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-md">
         <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" />
+            <Image src={"logo-mobile.svg"} width="30" height="30" alt="NoLoginVPN - VPN Without Login, Registration, or Logs" />
             <span className="font-semibold tracking-tight">NoLoginVPN</span>
           </div>
           <div className="flex items-center gap-2">
